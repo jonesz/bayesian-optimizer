@@ -1,16 +1,17 @@
+use faer::mat::MatRef;
 use std::marker::PhantomData;
 
-pub trait Mean<V, S> {
-    fn u(&self, x_0: &V) -> S;
+pub trait Mean<S> {
+    fn u(&self, x_0: &MatRef<S>) -> S;
 }
 
-pub struct Constant<V, S>(S, PhantomData<V>);
+pub struct Constant<S>(S);
 
-impl<V, S> Mean<V, S> for Constant<V, S>
+impl<S> Mean<S> for Constant<S>
 where
     S: Copy,
 {
-    fn u(&self, _: &V) -> S {
+    fn u(&self, _: &MatRef<S>) -> S {
         self.0
     }
 }
