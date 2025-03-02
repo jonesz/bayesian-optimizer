@@ -1,10 +1,10 @@
+-- l2 loss
+def l2 sub sqr add ne sqrt x_0 x_1 =
+	map2 sub x_0 x_1 |> map sqr |> reduce add ne |> sqrt
+	
 module type kernel = {
 	type v
 	type s
 
 	val kernel : v -> v -> s
-}
-
-module mk_kernel_se (R: real) (V: vector) : kernel = {
-	def kernel x_0 x_1 = ???
 }
