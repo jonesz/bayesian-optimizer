@@ -16,3 +16,12 @@ def kSE_f32 lengthscale sigma x_0 x_1 =
 
 def kAdd_f32 k0 k1 x_0 x_1 = kOp (f32.+) (k0 x_0 x_1) (k1 x_0 x_1)
 def kMul_f32 k0 k1 x_0 x_1 = kOp (f32.*) (k0 x_0 x_1) (k1 x_0 x_1)
+
+module kSE_mod(R: real) = {
+  type t = R.t
+
+  def kernel lengthscale sigma x_0 x_1 =
+    let top = map2 (R.-) x_0 x_1 |> map (flip (R.**) (R.i64 2)) |> reduce (R.+) (R.i64 0) |> R.sqrt
+    let bot = (R.**) lengthscale (R.i64 2) |> (R.*) (R.i64 2 |> R.neg)
+    in (R./) top bot |> R.exp |> (R.*) ((R.**) sigma (R.i64 2))
+}
