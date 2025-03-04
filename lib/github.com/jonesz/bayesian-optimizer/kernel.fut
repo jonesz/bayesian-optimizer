@@ -25,3 +25,13 @@ module kSE_mod(R: real) = {
     let bot = (R.**) lengthscale (R.i64 2) |> (R.*) (R.i64 2 |> R.neg)
     in (R./) top bot |> R.exp |> (R.*) ((R.**) sigma (R.i64 2))
 }
+
+-- ==
+-- entry: all_eq
+-- random input { [1000]f32 [1000]f32 [1000][10]f32  [1000][10]f32 }
+-- output { true }
+module M = kSE_mod f32
+entry all_eq l s x_0 x_1 =
+  let z_0 = map4 (kSE_f32)  l s x_0 x_1
+  let z_1 = map4 (M.kernel) l s x_0 x_1
+  in map2 (==) z_0 z_1 |> and
