@@ -1,3 +1,4 @@
 /target
 lib/github.com/jonesz/bayesian-optimizer/data
 lib/github.com/diku-dk
+venv/

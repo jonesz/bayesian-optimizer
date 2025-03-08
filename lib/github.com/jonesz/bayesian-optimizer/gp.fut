@@ -36,6 +36,13 @@ let kern = kSE_f32 1.0f32 1.0f32
 let mean = mk_mu_constant 0.0f32
 
 -- ==
+-- entry: test_C_inv_linalg
+-- input { }
+-- output { }
+entry test_C_inv_linalg X =
+	GP.compute_C_inv kern X
+	
+-- ==
 -- entry: test_u_D_linalg
 -- input { }
 -- output { }
