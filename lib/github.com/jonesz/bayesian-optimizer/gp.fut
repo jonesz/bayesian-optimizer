@@ -28,3 +28,25 @@ module gp_linalg(R: real) = {
 	def K_D kern C_inv X x =
 		K_D kern (R.-) L.matvecmul_row L.dotprod C_inv X x
 }
+
+import "kernel"
+import "mean"
+module GP = gp_linalg f32
+let kern = kSE_f32 1.0f32 1.0f32
+let mean = mk_mu_constant 0.0f32
+
+-- ==
+-- entry: test_u_D_linalg
+-- input { }
+-- output { }
+entry test_u_D_linalg X Y x =
+	let C_inv = GP.compute_C_inv kern X
+	in GP.u_D mean kern C_inv X Y x
+
+-- ==
+-- entry: test_K_D_linalg
+-- input { }
+-- output { }
+entry test_K_D_linalg X x =
+	let C_inv = GP.compute_C_inv kern X
+	in GP.K_D kern C_inv X x
