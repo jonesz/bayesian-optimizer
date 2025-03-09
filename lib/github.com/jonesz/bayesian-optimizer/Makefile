@@ -8,3 +8,4 @@ bench: kernel_bench.fut
 
 clean:
 	$(RM) *.c kernel kernel_bench
+	$(RM) optimizer
