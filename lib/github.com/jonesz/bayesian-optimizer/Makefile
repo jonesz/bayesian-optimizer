@@ -1,5 +1,5 @@
 test: kernel.fut
-	futhark test kernel.fut
+	futhark test kernel.fut optimizer.fut
 
 bench: kernel_bench.fut
 	futhark bench kernel_bench.fut
