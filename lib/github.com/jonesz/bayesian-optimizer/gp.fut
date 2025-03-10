@@ -1,59 +1,35 @@
 import "../../diku-dk/linalg/linalg"
 
-def before_deriv kern inv X =
-	map (\i -> map (\j -> kern i j) X) X |> inv
-	
--- u_s + K_s * K^{-1} * (y - u)
-def func_u_D 'a [z] mean kern add sub mul_matrow dp C_inv (X: [z]a) Y (x: a) =
-	let K_s = map (kern x) X
-	let u_s = mean x
-	let u   = map (mean) X |> map2 (sub) Y
-	in mul_matrow C_inv u |> dp K_s |> add u_s
+def cov 'a 't (kern: a -> a -> t) x_0 x_1 =
+	map (\a -> map (\b -> kern a b) x_1) x_0
 
--- K_ss - K_s * K^{-1} * K_s
-def func_K_D 'a [z] kern sub mul_matrow dp C_inv (X: [z]a) (x: a) =
-	let K_ss = kern x x 
-	let K_s  = map (kern x) X
-	in mul_matrow C_inv K_s |> dp K_s |> sub K_ss
+-- NOTE: We pass in `C_inv` because of autodiff computations; if we compute the derivative
+-- with `vjp`, etc., then autodiff will include whatever routine computes the inverse, which
+-- busts it.
+	
+-- u(x) + K(x, X) * inv(K(X, X)) * (Y - u(X)
+def func_u_D 'a [z] [l] mean kern add sub matmul matvecmul_row C_inv (X: [z]a) Y (x: [l]a) : [l]a =
+	let u_s = map (mean) x
+	let K_s = cov kern x X
+	let m   = map (mean) X |> map2 (sub) Y
+	in matmul K_s C_inv |> flip matvecmul_row m |> map2 (add) u_s
+
+-- K(x, x) - K(x, X) * inv(K(X, X)) * K(X, x)
+def func_K_D 'a [z] [l] kern matsub matmul C_inv (X: [z]a) (x: [l]a) =
+	let K_ss  = cov kern x x
+	let K_s_l = cov kern x X
+	let K_s_r = transpose K_s_l
+	in matmul K_s_l C_inv |> flip (matmul) K_s_r |> matsub K_ss
 
 module gp_linalg(R: real) = {
 	module L = mk_ordered_linalg R
 
 	def compute_C_inv kern X =
-		before_deriv kern L.inv X 
+		cov kern X X |> L.inv
 		
 	def u_D mean kern C_inv X Y x =
-		func_u_D mean kern (R.+) (R.-) L.matvecmul_row L.dotprod C_inv X Y x
+		func_u_D mean kern (R.+) (R.-) L.matmul L.matvecmul_row C_inv X Y x
 
 	def K_D kern C_inv X x =
-		func_K_D kern (R.-) L.matvecmul_row L.dotprod C_inv X x
+		func_K_D kern L.matsub L.matmul C_inv X x
 }
-
-import "kernel"
-import "mean"
-module GP = gp_linalg f32
-let kern = kSE_f32 1.0f32 1.0f32
-let mean = mk_mu_constant 0.0f32
-
--- ==
--- entry: test_C_inv_linalg
--- input { }
--- output { }
-entry test_C_inv_linalg X =
-	GP.compute_C_inv kern X
-	
--- ==
--- entry: test_u_D_linalg
--- input { }
--- output { }
-entry test_u_D_linalg X Y x =
-	let C_inv = GP.compute_C_inv kern X
-	in GP.u_D mean kern C_inv X Y x
-
--- ==
--- entry: test_K_D_linalg
--- input { }
--- output { }
-entry test_K_D_linalg X x =
-	let C_inv = GP.compute_C_inv kern X
-	in GP.K_D kern C_inv X x
