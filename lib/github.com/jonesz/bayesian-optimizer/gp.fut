@@ -1,6 +1,6 @@
 import "../../diku-dk/linalg/linalg"
 
-def cov 'a 't (kern: a -> a -> t) x_0 x_1 =
+def cov kern x_0 x_1 =
 	map (\a -> map (\b -> kern a b) x_1) x_0
 
 -- NOTE: We pass in `C_inv` because of autodiff computations; if we compute the derivative
@@ -8,8 +8,8 @@ def cov 'a 't (kern: a -> a -> t) x_0 x_1 =
 -- busts it.
 	
 -- u(x) + K(x, X) * inv(K(X, X)) * (Y - u(X)
-def func_u_D 'a 'b [z] [l] (mean: a -> b)
-						   (kern: a -> a -> b) add sub matmul matvecmul_row
+def func_u_D 'a 'b [z] [l] mean
+						   kern add sub matmul matvecmul_row
 						   (C_inv: [z][z]b) (X: [z]a) (Y: [z]b) (x: [l]a) : [l]a =
 	let u_s = map (mean) x
 	let K_s = cov kern x X
@@ -31,7 +31,7 @@ module gp_linalg(R: real) = {
 	module L = mk_ordered_linalg R
 
 	def compute_C_inv kern X =
-		cov kern X X |> L.inv
+		cov (kern) X X |> L.inv
 		
 	def u_D mean kern C_inv X Y x =
 		func_u_D mean kern (R.+) (R.-) L.matmul L.matvecmul_row C_inv X Y x
