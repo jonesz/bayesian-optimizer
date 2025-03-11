@@ -2,4 +2,5 @@ package github.com/jonesz/bayesian-optimizer
 
 require {
   github.com/diku-dk/linalg 0.6.0 #39eff097509db88ec82bcf9316186d3a147080a6
+  github.com/diku-dk/cpprandom 1.3.1 #7ea358bd8bbbeb4786030a21a8d947ef37d1e032
 }
