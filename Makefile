@@ -9,3 +9,4 @@ doc:
 clean:
 	$(RM) -rf doc/
 	make clean -C lib/github.com/jonesz/bayesian-optimizer
+	$(RM) examples-fut/example examples-fut/example.c
