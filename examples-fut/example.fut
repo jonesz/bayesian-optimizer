@@ -34,5 +34,10 @@ let xs =
 	let (_, X) = map (\rng_i -> GMM_sample rng_i w mu sigma) rngs |> unzip
 	in X
 
-entry main x =
-	(kde kernel_gaussian 1.0f32 xs x, GMM_density w mu sigma x)
+let obj h =
+	let x = (iota 100) |> map (f32.i64) |> map (flip (/) 25f32)
+	let kde_x = map (kde kernel_gaussian h xs) x
+	let den_x = map (GMM_density w mu sigma) x
+	in map2 (-) kde_x den_x |> map (flip (**) 2f32) |> reduce (+) 0f32
+
+entry main h = obj h
