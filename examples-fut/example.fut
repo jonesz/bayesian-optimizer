@@ -35,4 +35,4 @@ let xs =
 	in X
 
 entry main x =
-	(kde kernel_epanechnikov 1.0f32 xs x, GMM_density w mu sigma x)
+	(kde kernel_gaussian 1.0f32 xs x, GMM_density w mu sigma x)
